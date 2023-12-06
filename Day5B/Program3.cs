@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿/*using System.Collections.Concurrent;
+using System.Diagnostics;
 
 var almanac = File.ReadAllLines(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..\\..\\..\\almanac.txt"));
 var timer = new Stopwatch();
@@ -14,15 +15,20 @@ var map = new Map(almanac.Skip(1).ToList());
 map.ParseLines();
 
 var minimumLocations = Map.InitializeMinimums(seedPairs.Count);
+var rangePartitioner = Partitioner.Create(0, seedPairs.Count);
 
-await Parallel.ForEachAsync(seedPairs.Select((x, i) => (Value: x, Index: i)), async (seedPair, ct) =>
+Parallel.ForEach(rangePartitioner, range =>
 {
-    var rangeStart = seedPair.Value[0];
-    var rangeSize = seedPair.Value[1];
-    var rangeEnd = rangeStart + rangeSize - 1;
+    for (var index = range.Item1; index < range.Item2; index++)
+    {
+        var seedPair = seedPairs[index];
+        var rangeStart = seedPair[0];
+        var rangeSize = seedPair[1];
+        var rangeEnd = rangeStart + rangeSize - 1;
 
-    var minimum = await map.MinRangeLocation(rangeStart, rangeEnd, 0, (seedPair.Index + 1).ToString());
-    Map.UpdateMinimum(minimumLocations, seedPair.Index, minimum);
+        var minimum = map.MinRangeLocation(rangeStart, rangeEnd, 0, (index + 1).ToString());
+        Map.UpdateMinimum(minimumLocations, index, minimum);
+    }
 });
 
 timer.Stop();
@@ -40,7 +46,7 @@ class Map
         _lines = lines;
     }
 
-    public async Task<long> MinRangeLocation(long seedStartIndex, long seedEndIndex, int mapIndex, string logId)
+    public long MinRangeLocation(long seedStartIndex, long seedEndIndex, int mapIndex, string logId)
     {
         var logLabel = $"{logId} -{mapIndex + 1}-";
         Console.WriteLine($"start: {logLabel} [{seedStartIndex},{seedEndIndex}].");
@@ -52,13 +58,18 @@ class Map
         if (mapIndex < MaterialMaps.Count - 1)
         {
             var minimumLocations = InitializeMinimums(ranges.Count);
+            var rangePartitioner = Partitioner.Create(0, ranges.Count);
 
-            await Parallel.ForEachAsync(ranges.Select((x, i) => (Value: x, Index: i)), async (range, ct) =>
+            Parallel.ForEach(rangePartitioner, rangeSet =>
             {
-                var rangeStart = range.Value.Item1;
-                var rangeEnd = range.Value.Item2;
-                var minimum = await MinRangeLocation(rangeStart, rangeEnd, mapIndex + 1, $"{logId}.{range.Index + 1}");
-                UpdateMinimum(minimumLocations, range.Index, minimum);
+                for (int index = rangeSet.Item1; index < rangeSet.Item2; index++)
+                {
+                    var range = ranges[index];
+                    var rangeStart = range.Item1;
+                    var rangeEnd = range.Item2;
+                    var minimum = MinRangeLocation(rangeStart, rangeEnd, mapIndex + 1, $"{logId}.{index + 1}");
+                    UpdateMinimum(minimumLocations, index, minimum);
+                }
             });
 
             minimumLocation = minimumLocations.Min();
@@ -292,4 +303,4 @@ class SectionMap
         RangeSize = long.Parse(lineParts[2]);
         SourceEndIndex = SourceStartIndex + RangeSize - 1;
     }
-}
+}*/
