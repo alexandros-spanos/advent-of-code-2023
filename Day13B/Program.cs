@@ -62,6 +62,7 @@ class Pattern
             }
         }
     }
+
     public int Measure()
     {
         MeasureInitial();
